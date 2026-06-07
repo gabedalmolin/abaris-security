@@ -156,14 +156,84 @@ record warnings separately.
 
 The derived paired conclusion is not a run-level failure category.
 
-The exact oracle representation remains unresolved. Any accepted design must:
+An accepted oracle contract declares exactly one atomic predicate. Invalid
+contracts are rejected before execution and produce no observations.
 
-- be deterministic for the same valid evidence;
-- make `ABSENT` distinguishable from evaluation failure;
-- make required evidence explicit;
-- use bounded evaluation;
-- preserve evaluation inputs and output; and
-- avoid AI dependency.
+The first private-draft predicate set is:
+
+| Predicate kind | Required declaration |
+| --- | --- |
+| `process_exit_code_equals` | One integer exit code |
+| `process_signal_equals` | One supported signal identity |
+| `stream_regex_matches` | `stdout` or `stderr`, one restricted expression, and the identified private-draft regex profile |
+| `declared_file_exists` | One declared relative artifact path |
+| `declared_file_content_regex_matches` | One declared relative artifact path, one restricted expression, and the identified private-draft regex profile |
+| `closed_network_http_status_equals` | One declared response identity and one integer status |
+| `closed_network_http_body_regex_matches` | One declared response identity, one restricted expression, and the identified private-draft regex profile |
+
+Regular-expression predicates require complete bounded UTF-8 evidence and a
+restricted linear-time profile. The exact engine and numeric bounds remain
+private-draft implementation decisions and must be identified in an accepted
+contract and evaluation record.
+
+HTTP predicates evaluate only a declared response record collected from
+permitted reproducer-target traffic. The oracle cannot initiate network
+activity.
+
+Arbitrary executable predicates, workload-authoritative observations, compound
+or ordered predicates, scoring, AI-dependent evaluation, and general-purpose
+or unbounded regular expressions are unsupported.
+
+Before predicate evaluation, the trusted evaluator applies ordered eligibility
+gates for:
+
+1. mandatory infrastructure controls;
+2. comparison equivalence;
+3. supported conditions;
+4. resource-limit events;
+5. timeouts;
+6. target startup;
+7. reproducer completion;
+8. missing required evidence;
+9. truncated required evidence;
+10. invalid required evidence; and
+11. ambiguous required evidence.
+
+If every gate passes, predicate truth produces `PRESENT` and predicate
+falsehood produces `ABSENT`. Invalid contracts or unavailable mandatory
+controls detected before execution refuse the experiment and produce no
+observations. If a gate fails or becomes unverifiable after execution begins,
+the predicate is not evaluated and the affected run is `INDETERMINATE`.
+
+An exit code, signal, absent declared file, differing HTTP status, or unmatched
+bounded content is not automatically a failure when it is the predicate's
+subject and the evidence required to evaluate it is complete and valid. For
+declared-file existence, the trusted artifact inventory is required evidence;
+the subject file is not.
+
+Every `INDETERMINATE` result has exactly one primary reason selected by this
+fixed precedence:
+
+1. `INFRASTRUCTURE_FAILURE`
+2. `COMPARISON_EQUIVALENCE_FAILURE`
+3. `UNSUPPORTED_CONDITION`
+4. `RESOURCE_LIMIT_EXCEEDED`
+5. `TIMEOUT`
+6. `TARGET_STARTUP_FAILURE`
+7. `REPRODUCER_FAILURE`
+8. `EVIDENCE_MISSING`
+9. `EVIDENCE_TRUNCATED`
+10. `EVIDENCE_INVALID`
+11. `EVIDENCE_AMBIGUOUS`
+
+All gate failures, specific causes, and lower-precedence events remain
+attributable evidence. They do not become additional failure reasons.
+The failure-reason meanings are normative in
+[architecture.md](architecture.md#failure-reason-taxonomy).
+
+The normative private-draft decision table is
+[adr-028-observation-oracle.json](fixtures/adr-028-observation-oracle.json).
+It is an executable specification fixture, not a stable public schema.
 
 ## Comparison-equivalence requirements
 
@@ -323,6 +393,12 @@ This example illustrates concepts and is not an accepted schema.
   "oracle": {
     "id": "presence-oracle-id",
     "digest": "sha256:ORACLE_DIGEST",
+    "predicate": {
+      "kind": "stream_regex_matches",
+      "stream": "stderr",
+      "pattern": "RESTRICTED_LINEAR_TIME_EXPRESSION",
+      "regex_profile": "PRIVATE_DRAFT_PROFILE_ID"
+    },
     "outcomes": ["PRESENT", "ABSENT", "INDETERMINATE"]
   },
   "comparison": {
@@ -372,8 +448,7 @@ The specification must not contain behavior for:
 - Final serialization, schema, and compatibility policy.
 - First supported target ecosystem.
 - Allowed reproducer step forms.
-- Oracle predicates, observation assignment, and bounded failure-reason
-  taxonomy.
+- Exact restricted regular-expression engine and numeric bounds.
 - Setup-network policy values and enforcement evidence.
 - Dependency acquisition and identity model.
 - Nondeterminism and rerun policy.

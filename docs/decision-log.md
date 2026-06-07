@@ -34,13 +34,14 @@ Status values:
 | ADR-018 | Open | First supported target ecosystem |
 | ADR-019 | Open | Qualifying isolation backend and host support |
 | ADR-020 | Open | Setup-network policy modes and dependency acquisition |
-| ADR-021 | Open | Oracle evaluation, observation assignment, and failure-reason model |
+| ADR-021 | Superseded | Oracle evaluation, observation assignment, and failure-reason model |
 | ADR-022 | Open | Nondeterminism and rerun policy |
 | ADR-023 | Open | Evidence schema and protection |
 | ADR-024 | Accepted | `CANDIDATE_ONLY_PRESENT` is a blocking comparative conclusion |
 | ADR-025 | Accepted | Networked reproduction uses a closed per-run reproducer-target network |
 | ADR-026 | Accepted | Local Git source is materialized under a hardened no-implicit-execution policy |
 | ADR-027 | Accepted | Public schema stability is gated on 3–5 representative historical cases |
+| ADR-028 | Accepted | Observation assignment uses ordered eligibility gates and one atomic declarative oracle predicate |
 
 ## ADR-001: Narrow product identity
 
@@ -278,22 +279,11 @@ Decision criteria:
 
 ## ADR-021: Oracle evaluation and observation model
 
-**Status:** Open
+**Status:** Superseded
 
-Decision criteria:
-
-- deterministic three-state evaluation;
-- clear distinction between `ABSENT` and failure;
-- supported evidence predicates, including exit status, bounded output matching,
-  declared files, process outcomes, and closed-network HTTP responses;
-- explicit handling of timeout, crash, target startup failure, reproducer
-  failure, missing evidence, and ambiguous evidence;
-- a bounded `failure_reason` taxonomy that is required for `INDETERMINATE` and
-  remains separate from observations and conclusions;
-- minimal trusted evaluator surface;
-- expressiveness for curated historical cases;
-- bounded parsing and execution; and
-- preserved evaluation provenance.
+Superseded by ADR-028, which resolves this decision for the first private-draft
+executable specification increment. Future expansion of the oracle language or
+failure-reason taxonomy requires a separate decision and threat-model review.
 
 ## ADR-022: Nondeterminism and reruns
 
@@ -442,3 +432,83 @@ Rationale: representative evidence should shape oracle grammar, network
 declarations, evidence taxonomy, and failure categories before public
 stability. The gate must not be used to expand v0 into broad interoperability,
 disclosure, duplicate-detection, or regression-generation schemas.
+
+## ADR-028: Observation eligibility and atomic oracle predicates
+
+**Status:** Accepted
+
+**Dependencies:** ADR-003, ADR-004, ADR-008, ADR-009, ADR-013, ADR-014,
+ADR-016, ADR-025, and ADR-027.
+
+The trusted evaluator assigns one run observation through two ordered stages.
+
+First, it applies fail-closed eligibility gates for mandatory controls,
+comparison equivalence, supported conditions, execution status, and evidence
+integrity. Invalid contracts or unavailable mandatory controls detected before
+execution refuse the experiment and produce no observations. If one or more
+gates fail or become unverifiable after execution begins, the affected run is
+`INDETERMINATE` and receives exactly one primary bounded `failure_reason`. All
+failure events and details remain separate evidence.
+
+The primary reason is selected by this fixed precedence:
+
+1. `INFRASTRUCTURE_FAILURE`
+2. `COMPARISON_EQUIVALENCE_FAILURE`
+3. `UNSUPPORTED_CONDITION`
+4. `RESOURCE_LIMIT_EXCEEDED`
+5. `TIMEOUT`
+6. `TARGET_STARTUP_FAILURE`
+7. `REPRODUCER_FAILURE`
+8. `EVIDENCE_MISSING`
+9. `EVIDENCE_TRUNCATED`
+10. `EVIDENCE_INVALID`
+11. `EVIDENCE_AMBIGUOUS`
+
+`INFRASTRUCTURE_FAILURE` covers fail-closed materialization, isolation,
+network-policy, collector, and evaluator-control failures. Their specific
+causes and all lower-precedence events remain evidence rather than additional
+failure reasons.
+
+Second, only after every eligibility gate passes, the evaluator applies
+exactly one atomic declarative predicate. Predicate truth produces `PRESENT`;
+predicate falsehood produces `ABSENT`.
+
+An exit code, signal, absent declared file, differing HTTP status, or unmatched
+bounded content is not automatically a failure when it is the predicate's
+subject and the trusted evidence required to evaluate it is complete and valid.
+
+The first private-draft predicate set is:
+
+- exact process exit code;
+- exact process signal;
+- bounded stdout or stderr regular-expression search;
+- declared file existence;
+- bounded declared-file content regular-expression search;
+- declared closed-network HTTP response status; and
+- bounded declared closed-network HTTP response body regular-expression
+  search.
+
+Regular-expression predicates require complete bounded UTF-8 evidence and a
+restricted linear-time profile. Invalid oracle contracts are rejected before
+execution and produce no observations. Arbitrary executable predicates,
+workload-authoritative observations, compound or ordered predicates, scoring,
+AI-dependent evaluation, oracle-initiated network traffic, and general-purpose
+or unbounded regular expressions are unsupported.
+
+Rationale: an atomic declarative predicate keeps the trusted evaluator small and
+deterministic. Ordered eligibility gates prevent failure, ambiguity, or missing
+evidence from silently becoming `ABSENT`. One primary failure reason preserves
+deterministic classification while attributable evidence preserves the full
+failure record.
+
+Rejected alternatives:
+
+- executable or workload-authoritative oracle logic, because it expands the
+  trusted surface and permits observation forgery;
+- Boolean or ordered predicate composition, because it adds unnecessary parser,
+  precedence, and failure-semantics complexity before representative cases
+  justify it;
+- binary `PRESENT` or `ABSENT` evaluation with failures recorded only as
+  metadata, because failure could collapse into `ABSENT`; and
+- general-purpose or unbounded regular expressions, because they create denial
+  of service and cross-engine determinism risk.

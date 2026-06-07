@@ -31,14 +31,22 @@ Exit criteria:
 Objective: exercise private draft contracts against representative cases before
 stabilizing any public schema or building a general runner.
 
-Planned deliverables:
+Accepted first executable-specification increment:
 
-- private, disposable draft experiment, oracle, and evidence contracts;
+- ADR-028 defines ordered fail-closed observation eligibility, one atomic
+  declarative oracle predicate, and one primary bounded failure reason;
+- the normative `private-draft` ADR-028 decision-table fixture covers every
+  supported predicate's true and false outcomes, every bounded failure reason,
+  precedence, invariants, and rejected oracle contracts; and
+- the increment contains no runner, validator, production isolation backend, or
+  public compatibility promise.
+
+Remaining planned deliverables:
+
+- additional private, disposable draft experiment and evidence contracts;
 - table-driven fixtures for all nine observation pairs;
 - invariant fixtures proving `CANDIDATE_ONLY_PRESENT` is never success and
   `INCONCLUSIVE` occurs only when at least one observation is `INDETERMINATE`;
-- fixtures for missing, contradictory, truncated, and invalid evidence;
-- fixtures proving `INDETERMINATE` always carries a bounded failure reason;
 - policy fixtures proving non-network cases cannot declare peers or ports,
   closed-network cases cannot publish host ports or use external egress, and
   materialization rejects unsupported features by default;
@@ -160,10 +168,6 @@ or patch correctness.
 - Which isolation backend and host platforms can meet the mandatory profile?
 - What exact setup-network policy modes are supported?
 - How are setup dependencies acquired, pinned, cached, and attributed?
-- Which bounded oracle predicates and trusted evaluator forms are supported?
-- What conditions distinguish oracle `ABSENT` from `INDETERMINATE`?
-- Which bounded failure-reason taxonomy explains every `INDETERMINATE`
-  observation?
 - What rerun policy is required before stable observations are accepted?
 - What evidence is retained, redacted, encrypted, or excluded by default?
 - What schema and compatibility policy should be published after the

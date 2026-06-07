@@ -1,0 +1,327 @@
+{
+  "schema": {
+    "id": "dev.abaris.private-draft.adr-028-observation-oracle-fixture.v0",
+    "stability": "private-draft",
+    "compatibility": "none"
+  },
+  "decision": "ADR-028",
+  "invariants": {
+    "exactly_one_atomic_predicate": true,
+    "invalid_contracts_produce_observations": false,
+    "invalid_contracts_produce_comparative_conclusions": false,
+    "unavailable_pre_execution_controls_produce_observations": false,
+    "unavailable_pre_execution_controls_produce_comparative_conclusions": false,
+    "gate_failure_evaluates_predicate": false,
+    "determinate_observations_have_failure_reason": false,
+    "indeterminate_observations_have_exactly_one_primary_failure_reason": true,
+    "indeterminate_observations_are_coerced_to_absent": false,
+    "workload_target_reproducer_script_or_ai_output_is_authoritative": false,
+    "conclusions_use_assigned_observations_only": true,
+    "run_results_contain_paired_conclusion": false,
+    "failure_events_remain_separate_evidence": true
+  },
+  "failure_reason_precedence": [
+    "INFRASTRUCTURE_FAILURE",
+    "COMPARISON_EQUIVALENCE_FAILURE",
+    "UNSUPPORTED_CONDITION",
+    "RESOURCE_LIMIT_EXCEEDED",
+    "TIMEOUT",
+    "TARGET_STARTUP_FAILURE",
+    "REPRODUCER_FAILURE",
+    "EVIDENCE_MISSING",
+    "EVIDENCE_TRUNCATED",
+    "EVIDENCE_INVALID",
+    "EVIDENCE_AMBIGUOUS"
+  ],
+  "observation_cases": [
+    {
+      "id": "process-exit-code-true",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": true,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "PRESENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "process-exit-code-false",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": false,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "ABSENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "process-signal-true",
+      "predicate_kind": "process_signal_equals",
+      "predicate_truth": true,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "PRESENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "process-signal-false",
+      "predicate_kind": "process_signal_equals",
+      "predicate_truth": false,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "ABSENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "stream-regex-true",
+      "predicate_kind": "stream_regex_matches",
+      "predicate_truth": true,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "PRESENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "stream-regex-false",
+      "predicate_kind": "stream_regex_matches",
+      "predicate_truth": false,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "ABSENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "declared-file-exists-true",
+      "predicate_kind": "declared_file_exists",
+      "predicate_truth": true,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "PRESENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "declared-file-exists-false",
+      "predicate_kind": "declared_file_exists",
+      "predicate_truth": false,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "ABSENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "declared-file-content-regex-true",
+      "predicate_kind": "declared_file_content_regex_matches",
+      "predicate_truth": true,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "PRESENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "declared-file-content-regex-false",
+      "predicate_kind": "declared_file_content_regex_matches",
+      "predicate_truth": false,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "ABSENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "closed-network-http-status-true",
+      "predicate_kind": "closed_network_http_status_equals",
+      "predicate_truth": true,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "PRESENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "closed-network-http-status-false",
+      "predicate_kind": "closed_network_http_status_equals",
+      "predicate_truth": false,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "ABSENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "closed-network-http-body-regex-true",
+      "predicate_kind": "closed_network_http_body_regex_matches",
+      "predicate_truth": true,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "PRESENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "closed-network-http-body-regex-false",
+      "predicate_kind": "closed_network_http_body_regex_matches",
+      "predicate_truth": false,
+      "failure_evidence": [],
+      "expected_predicate_evaluated": true,
+      "expected_observation": "ABSENT",
+      "expected_failure_reason": null
+    },
+    {
+      "id": "infrastructure-failure",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["INFRASTRUCTURE_FAILURE"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "INFRASTRUCTURE_FAILURE"
+    },
+    {
+      "id": "comparison-equivalence-failure",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["COMPARISON_EQUIVALENCE_FAILURE"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "COMPARISON_EQUIVALENCE_FAILURE"
+    },
+    {
+      "id": "unsupported-condition",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["UNSUPPORTED_CONDITION"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "UNSUPPORTED_CONDITION"
+    },
+    {
+      "id": "resource-limit-exceeded",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["RESOURCE_LIMIT_EXCEEDED"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "RESOURCE_LIMIT_EXCEEDED"
+    },
+    {
+      "id": "timeout",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["TIMEOUT"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "TIMEOUT"
+    },
+    {
+      "id": "target-startup-failure",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["TARGET_STARTUP_FAILURE"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "TARGET_STARTUP_FAILURE"
+    },
+    {
+      "id": "reproducer-failure",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["REPRODUCER_FAILURE"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "REPRODUCER_FAILURE"
+    },
+    {
+      "id": "evidence-missing",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["EVIDENCE_MISSING"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "EVIDENCE_MISSING"
+    },
+    {
+      "id": "evidence-truncated",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["EVIDENCE_TRUNCATED"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "EVIDENCE_TRUNCATED"
+    },
+    {
+      "id": "evidence-invalid",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["EVIDENCE_INVALID"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "EVIDENCE_INVALID"
+    },
+    {
+      "id": "evidence-ambiguous",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": ["EVIDENCE_AMBIGUOUS"],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "EVIDENCE_AMBIGUOUS"
+    },
+    {
+      "id": "primary-reason-precedence",
+      "predicate_kind": "process_exit_code_equals",
+      "predicate_truth": null,
+      "failure_evidence": [
+        "EVIDENCE_AMBIGUOUS",
+        "TIMEOUT",
+        "INFRASTRUCTURE_FAILURE",
+        "EVIDENCE_MISSING"
+      ],
+      "expected_predicate_evaluated": false,
+      "expected_observation": "INDETERMINATE",
+      "expected_failure_reason": "INFRASTRUCTURE_FAILURE"
+    }
+  ],
+  "rejected_contract_cases": [
+    {
+      "id": "arbitrary-executable-predicate",
+      "contract_form": "execute_script",
+      "expected_accepted": false,
+      "expected_observations_produced": false
+    },
+    {
+      "id": "compound-boolean-predicate",
+      "contract_form": "boolean_composition",
+      "expected_accepted": false,
+      "expected_observations_produced": false
+    },
+    {
+      "id": "ordered-predicate-list",
+      "contract_form": "ordered_predicate_list",
+      "expected_accepted": false,
+      "expected_observations_produced": false
+    },
+    {
+      "id": "scoring-predicate",
+      "contract_form": "weighted_score",
+      "expected_accepted": false,
+      "expected_observations_produced": false
+    },
+    {
+      "id": "ai-dependent-predicate",
+      "contract_form": "model_judgment",
+      "expected_accepted": false,
+      "expected_observations_produced": false
+    },
+    {
+      "id": "oracle-initiated-network-request",
+      "contract_form": "oracle_network_request",
+      "expected_accepted": false,
+      "expected_observations_produced": false
+    },
+    {
+      "id": "unbounded-general-purpose-regex",
+      "contract_form": "general_purpose_unbounded_regex",
+      "expected_accepted": false,
+      "expected_observations_produced": false
+    },
+    {
+      "id": "unknown-predicate-kind",
+      "contract_form": "unknown",
+      "expected_accepted": false,
+      "expected_observations_produced": false
+    }
+  ]
+}

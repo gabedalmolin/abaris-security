@@ -201,9 +201,111 @@ represented as the reason for an indeterminate observation.
 
 The derived conclusion remains a separate paired-run result.
 
-The exact permitted oracle language remains unresolved. A small declarative
-oracle is the strongest default because it minimizes the trusted computing
-base, but it may not express every useful historical case.
+Invalid oracle contracts are rejected before execution and produce no
+observations. Accepted contracts use exactly one atomic declarative predicate.
+Arbitrary executable predicates, workload-authoritative observations, compound
+or ordered predicates, scoring, AI-dependent evaluation, and
+oracle-initiated network traffic are unsupported.
+
+#### Observation eligibility gates
+
+The evaluator applies ordered fail-closed gates before evaluating the atomic
+predicate:
+
+1. Mandatory materialization, isolation, network-policy, collection, and
+   evaluator controls completed and remained verifiable.
+2. The paired experiment satisfies the comparison-equivalence contract.
+3. The run and its oracle use only supported conditions.
+4. No resource limit invalidated evaluation.
+5. No timeout invalidated evaluation.
+6. Any declared target started successfully and remained eligible.
+7. The reproducer completed in a state that permits oracle evaluation.
+8. Every required evidence object is present.
+9. No required evidence object is truncated.
+10. Every required evidence object is valid for its declared type.
+11. Required evidence is unambiguous.
+
+If every gate passes, the predicate is evaluated. Predicate truth produces
+`PRESENT`; predicate falsehood produces `ABSENT`.
+
+Invalid contracts or unavailable mandatory controls detected before execution
+refuse the experiment and produce no observations. If one or more gates fail
+or become unverifiable after execution begins, the predicate is not evaluated.
+The affected run is `INDETERMINATE`, receives exactly one primary bounded
+`failure_reason`, and preserves all gate failures and details as separate
+evidence. A cross-run comparison-equivalence failure discovered after execution
+begins makes both affected observations `INDETERMINATE`.
+
+#### Atomic oracle predicates
+
+The first private-draft predicate set is:
+
+| Predicate | Required evidence | Truth condition |
+| --- | --- | --- |
+| Exact process exit code | Complete trusted process outcome | Recorded exit code equals the declared integer |
+| Exact process signal | Complete trusted process outcome | Recorded terminating signal equals the declared signal |
+| Stdout or stderr regular-expression search | Complete bounded UTF-8 stream | Declared restricted expression matches the declared stream |
+| Declared file existence | Complete trusted artifact inventory | Declared relative artifact path exists |
+| Declared-file content regular-expression search | Complete bounded UTF-8 declared file | Declared restricted expression matches the file content |
+| Closed-network HTTP response status | Complete trusted response record from declared reproducer-target traffic | Recorded status equals the declared integer |
+| Closed-network HTTP response body regular-expression search | Complete bounded UTF-8 trusted response body from declared reproducer-target traffic | Declared restricted expression matches the response body |
+
+An exit code, signal, absent declared file, differing HTTP status, or unmatched
+bounded content is not automatically a failure when it is the predicate's
+subject. For example, declared-file existence evaluates false when the trusted
+artifact inventory is complete and the subject path is absent; it is
+`EVIDENCE_MISSING` only when the inventory required to make that determination
+is absent.
+
+Regular-expression predicates use a restricted linear-time profile. They reject
+unsupported syntax and require complete bounded UTF-8 evidence. The exact
+engine and numeric bounds remain private-draft implementation decisions, but an
+accepted contract and its preserved evaluation record must identify them.
+
+HTTP predicates evaluate only already-collected evidence from traffic permitted
+by the closed reproduction-network contract. The oracle does not initiate
+network activity.
+
+#### Failure reason taxonomy
+
+The evaluator selects the first applicable primary failure reason by this fixed
+precedence:
+
+| Precedence | Failure reason | Meaning |
+| --- | --- | --- |
+| 1 | `INFRASTRUCTURE_FAILURE` | A mandatory materialization, isolation, network-policy, collector, or evaluator control failed or became unverifiable |
+| 2 | `COMPARISON_EQUIVALENCE_FAILURE` | A required paired-run equivalence condition failed or became unverifiable |
+| 3 | `UNSUPPORTED_CONDITION` | Evaluation encountered a required condition or evidence form outside the accepted private-draft contract |
+| 4 | `RESOURCE_LIMIT_EXCEEDED` | An externally enforced resource limit event invalidated reliable evaluation |
+| 5 | `TIMEOUT` | A declared step or total wall-clock timeout invalidated reliable evaluation |
+| 6 | `TARGET_STARTUP_FAILURE` | A declared target did not reach or retain the required state for reliable evaluation |
+| 7 | `REPRODUCER_FAILURE` | The reproducer failed in a way that prevented reliable predicate evaluation |
+| 8 | `EVIDENCE_MISSING` | Evidence required to evaluate the predicate is absent |
+| 9 | `EVIDENCE_TRUNCATED` | Evidence required to evaluate the predicate is incomplete because it was truncated |
+| 10 | `EVIDENCE_INVALID` | Evidence required to evaluate the predicate is malformed or invalid for its declared type |
+| 11 | `EVIDENCE_AMBIGUOUS` | Complete valid evidence supports no single deterministic predicate input |
+
+The taxonomy does not replace evidence: the selected reason and every observed
+gate failure, specific cause, violation, and lower-precedence event are
+preserved separately.
+
+#### Observation assignment invariants
+
+- `PRESENT` is valid only after every eligibility gate passes and the atomic
+  predicate evaluates true.
+- `ABSENT` is valid only after every eligibility gate passes and the atomic
+  predicate evaluates false.
+- `INDETERMINATE` is never coerced into `ABSENT`.
+- Invalid contracts produce no observation and no comparative conclusion.
+- Unavailable mandatory controls detected before execution produce no
+  observation and no comparative conclusion.
+- Every `INDETERMINATE` observation has exactly one bounded primary
+  `failure_reason`.
+- Workload, target, reproducer, script, and AI output are never authoritative
+  for an observation. They may contribute only untrusted evidence evaluated
+  through the declared atomic predicate.
+- A conclusion compares the two assigned observations. It does not reinterpret
+  raw execution, evidence, diagnostics, or failure events independently.
 
 ### Conclusion derivation
 
@@ -318,8 +420,7 @@ Assign when reliable `PRESENT` or `ABSENT` evaluation is impossible, including:
 - comparison-equivalence failure.
 
 Every `INDETERMINATE` observation must include a bounded `failure_reason`.
-Determining the supported taxonomy and exact oracle predicates remains governed
-by ADR-021.
+ADR-028 defines the first private-draft taxonomy and atomic oracle predicates.
 
 ## Conclusion matrix
 
@@ -396,7 +497,6 @@ Human- and machine-readable output must not state or imply:
 - Execution backend and supported host platforms.
 - Setup-network policy modes and evidence requirements.
 - Dependency acquisition and immutable identity.
-- Oracle representation and trusted evaluator surface.
 - Rerun and nondeterminism policy.
 - Evidence schema, retention, redaction, encryption, and signing.
 - Exact support policy for submodules and external source mechanisms.
