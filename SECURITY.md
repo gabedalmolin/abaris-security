@@ -71,6 +71,34 @@ A future supported run must:
 
 Containers alone are not a sufficient hostile-code security boundary.
 
+## Runner boundary
+
+The runner is an execution boundary, not a verdict authority. It receives an
+already-materialized source reference and one bounded request for one side and
+one illustrative private-draft phase. It applies the received policies and
+returns a factual execution record and captured-artifact references.
+
+A future supported runner is part of the trusted computing base for applying
+controls and reporting execution facts, but that trust does not grant verdict
+authority. Runner and backend trust analysis and conformance testing remain
+required before implementation support.
+
+The runner must not rematerialize source, fetch remotes, initialize submodules,
+acquire LFS content, use object alternates, honor replace refs, acquire
+partial-clone or promisor objects, or weaken ADR-026.
+
+An execution record is an input to the evidence bundle, not the evidence bundle
+itself. The runner does not evaluate the oracle, assign observations, select
+the bounded normative `failure_reason`, derive conclusions, or assemble an
+authoritative evidence bundle. Runner-reported failure and verdict-like labels
+are diagnostics only.
+
+If a mandatory control cannot be applied before execution, the runner must
+refuse the attempt. If the runner starts without a mandatory control or cannot
+report mandatory-policy status, the execution is ineligible for an
+authoritative determinate observation. Infrastructure failure must never
+become `ABSENT`.
+
 ## Observation and claim safety
 
 - `PRESENT` requires successful trusted evaluation of the defined oracle.

@@ -1,0 +1,213 @@
+{
+  "schema": {
+    "id": "dev.abaris.private-draft.adr-030-runner-boundary-fixture.v0",
+    "stability": "private-draft",
+    "compatibility": "none"
+  },
+  "decision": "ADR-030",
+  "fixture_purpose": "Normative conceptual runner-boundary examples, not an implementation, stable API, final serialization, backend selection, or public schema.",
+  "digest_placeholder_convention": {
+    "format": "sha256:EXAMPLE_PLACEHOLDER_<LABEL>",
+    "placeholders_are_real_digests": false
+  },
+  "invariants": {
+    "runner_is_execution_boundary": true,
+    "runner_is_verdict_authority": false,
+    "runner_is_future_tcb_for_factual_execution": true,
+    "tcb_trust_grants_verdict_authority": false,
+    "one_request_has_exactly_one_side": true,
+    "one_request_has_exactly_one_phase": true,
+    "phase_names_are_stable_taxonomy": false,
+    "source_reference_is_already_materialized": true,
+    "runner_may_rematerialize_or_acquire_source": false,
+    "runner_may_fetch_remotes": false,
+    "runner_may_initialize_submodules": false,
+    "runner_may_acquire_lfs": false,
+    "runner_may_use_alternates_replace_refs_or_partial_clone": false,
+    "execution_record_is_evidence_bundle": false,
+    "execution_record_is_input_to_evidence_bundle": true,
+    "runner_assembles_authoritative_evidence_bundle": false,
+    "runner_assigns_authoritative_observation": false,
+    "runner_selects_normative_failure_reason": false,
+    "runner_derives_comparative_conclusion": false,
+    "runner_diagnostic_labels_are_normative": false,
+    "effective_execution_parameters_are_stable_api": false,
+    "missing_mandatory_policy_status_is_observation_eligible": false,
+    "infrastructure_failure_may_become_absent": false
+  },
+  "conceptual_runner_request": {
+    "run_id": "EXAMPLE_RUN_ID",
+    "side": "baseline",
+    "phase": {
+      "name": "EXAMPLE_PRIVATE_DRAFT_PHASE",
+      "stability": "private-draft",
+      "illustrative_only": true
+    },
+    "materialized_source_reference": {
+      "snapshot_digest": "sha256:EXAMPLE_PLACEHOLDER_MATERIALIZED_SOURCE",
+      "materialization_record_digest": "sha256:EXAMPLE_PLACEHOLDER_MATERIALIZATION_RECORD",
+      "already_materialized_under": "ADR-026"
+    },
+    "command": {
+      "identity_digest": "sha256:EXAMPLE_PLACEHOLDER_COMMAND_IDENTITY",
+      "arguments": [
+        "EXAMPLE_EXECUTABLE",
+        "EXAMPLE_ARGUMENT"
+      ]
+    },
+    "working_directory": "EXAMPLE_DECLARED_RELATIVE_WORKING_DIRECTORY",
+    "declared_environment": {
+      "EXAMPLE_DECLARED_VARIABLE": "EXAMPLE_DECLARED_VALUE"
+    },
+    "declared_limits_digest": "sha256:EXAMPLE_PLACEHOLDER_LIMITS",
+    "network_contract_digest": "sha256:EXAMPLE_PLACEHOLDER_NETWORK_CONTRACT",
+    "expected_target_configuration": null,
+    "artifact_capture_policy_digest": "sha256:EXAMPLE_PLACEHOLDER_CAPTURE_POLICY",
+    "redaction_and_capture_constraints_digest": "sha256:EXAMPLE_PLACEHOLDER_CAPTURE_CONSTRAINTS",
+    "mandatory_controls_required": [
+      "isolation_policy",
+      "network_policy",
+      "resource_limits",
+      "materialized_source_read_only",
+      "artifact_capture_policy"
+    ],
+    "source_acquisition_prohibited": [
+      "remote_fetch",
+      "submodule_initialization",
+      "lfs_acquisition",
+      "object_alternates",
+      "replace_refs",
+      "partial_clone_or_promisor_acquisition",
+      "rematerialization"
+    ]
+  },
+  "conceptual_factual_execution_record": {
+    "run_id": "EXAMPLE_RUN_ID",
+    "side": "baseline",
+    "attempt_id": "EXAMPLE_EXECUTION_ATTEMPT_ID",
+    "runner_identity": {
+      "available": true,
+      "identity_digest": "sha256:EXAMPLE_PLACEHOLDER_RUNNER_IDENTITY",
+      "identity_unavailability_reason": null
+    },
+    "phase": {
+      "name": "EXAMPLE_PRIVATE_DRAFT_PHASE",
+      "stability": "private-draft",
+      "illustrative_only": true
+    },
+    "command_identity_digest": "sha256:EXAMPLE_PLACEHOLDER_COMMAND_IDENTITY",
+    "effective_execution_parameters": {
+      "classification": "audit_facts_not_stable_api",
+      "identity_digest": "sha256:EXAMPLE_PLACEHOLDER_EFFECTIVE_PARAMETERS",
+      "facts": {
+        "working_directory": "EXAMPLE_EFFECTIVE_RELATIVE_WORKING_DIRECTORY",
+        "environment_identity_digest": "sha256:EXAMPLE_PLACEHOLDER_EFFECTIVE_ENVIRONMENT",
+        "limits_identity_digest": "sha256:EXAMPLE_PLACEHOLDER_EFFECTIVE_LIMITS",
+        "network_contract_identity_digest": "sha256:EXAMPLE_PLACEHOLDER_EFFECTIVE_NETWORK_CONTRACT"
+      }
+    },
+    "applied_controls": {
+      "isolation_policy": "applied",
+      "network_policy": "applied",
+      "resource_limits": "applied",
+      "materialized_source_read_only": "applied",
+      "artifact_capture_policy": "applied"
+    },
+    "policy_status_complete": true,
+    "started_at": "2000-01-01T00:00:00Z",
+    "ended_at": "2000-01-01T00:00:01Z",
+    "execution_started": true,
+    "process_result": {
+      "exit_code": 0,
+      "signal": null
+    },
+    "termination_reason": "process_exited",
+    "timeout_status": "not_reached",
+    "resource_limit_status": "not_exceeded",
+    "network_policy_status": "applied_no_violation_reported",
+    "materialized_source_access_status": "read_only_reference_used",
+    "captured_evidence_references": [
+      {
+        "ref": "artifact:example-stdout",
+        "provenance": "runner_execution.stdout",
+        "digest": "sha256:EXAMPLE_PLACEHOLDER_STDOUT"
+      }
+    ],
+    "infrastructure_errors": [],
+    "bounded_warnings": [],
+    "runner_diagnostic_labels": [],
+    "authoritative_observation": null,
+    "normative_failure_reason": null,
+    "comparative_conclusion": null,
+    "authoritative_evidence_bundle": null
+  },
+  "boundary_cases": [
+    {
+      "id": "factual-success-has-no-runner-verdict",
+      "runner_execution_started": true,
+      "runner_policy_status_complete": true,
+      "runner_execution_record_kind": "factual_input_to_evidence_bundle",
+      "runner_authoritative_observation": null,
+      "runner_normative_failure_reason": null,
+      "runner_comparative_conclusion": null,
+      "core_next_step": "apply_remaining_eligibility_gates_and_evaluate_oracle"
+    },
+    {
+      "id": "mandatory-control-unavailable-before-start",
+      "runner_execution_started": false,
+      "runner_policy_status": {
+        "network_policy": "unavailable"
+      },
+      "runner_diagnostic_failure_label": "EXAMPLE_NETWORK_POLICY_UNAVAILABLE",
+      "runner_diagnostic_label_is_normative_failure_reason": false,
+      "expected_core_observation": null,
+      "expected_core_comparative_conclusion": null,
+      "expected_authoritative_evidence_bundle": false,
+      "permitted_retained_record": "non_conclusive_attempt_record"
+    },
+    {
+      "id": "infrastructure-failure-after-start",
+      "runner_execution_started": true,
+      "runner_infrastructure_error": "EXAMPLE_COLLECTOR_CONTROL_FAILURE",
+      "runner_diagnostic_failure_label": "EXAMPLE_RUNNER_INFRASTRUCTURE_FAILURE",
+      "runner_diagnostic_label_is_normative_failure_reason": false,
+      "expected_core_predicate_evaluated": false,
+      "expected_core_observation": "INDETERMINATE",
+      "expected_core_normative_failure_reason": "INFRASTRUCTURE_FAILURE",
+      "expected_core_observation_absent": false
+    },
+    {
+      "id": "mandatory-policy-status-omitted-after-start",
+      "runner_execution_started": true,
+      "omitted_mandatory_policy_status": "resource_limits",
+      "expected_core_execution_eligible_for_determinate_observation": false,
+      "expected_core_predicate_evaluated": false,
+      "expected_core_observation": "INDETERMINATE",
+      "expected_core_normative_failure_reason": "INFRASTRUCTURE_FAILURE"
+    },
+    {
+      "id": "runner-verdict-like-label-ignored",
+      "runner_execution_started": true,
+      "runner_reported_auxiliary_label": "ABSENT",
+      "runner_reported_auxiliary_label_authoritative": false,
+      "expected_core_uses_label_for_observation": false,
+      "expected_core_uses_label_for_conclusion": false,
+      "expected_core_next_step": "apply_eligibility_gates_and_evaluate_oracle_independently"
+    }
+  ],
+  "non_goals": [
+    "runner_implementation",
+    "backend_selection",
+    "isolation_backend_selection",
+    "stable_runner_api",
+    "stable_phase_taxonomy",
+    "public_schema",
+    "storage",
+    "signature_model",
+    "scheduler",
+    "cli",
+    "ci_integration",
+    "private_vulnerability_handling",
+    "production_execution"
+  ]
+}

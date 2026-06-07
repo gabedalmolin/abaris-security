@@ -43,6 +43,7 @@ Status values:
 | ADR-027 | Accepted | Public schema stability is gated on 3–5 representative historical cases |
 | ADR-028 | Accepted | Observation assignment uses ordered eligibility gates and one atomic declarative oracle predicate |
 | ADR-029 | Accepted | A finalized evidence bundle preserves a minimum auditable result and tamper-evident integrity record |
+| ADR-030 | Accepted | The runner is a replaceable execution boundary, not a verdict authority |
 
 ## ADR-001: Narrow product identity
 
@@ -603,3 +604,144 @@ Rejected alternatives:
   management, and trust roots remain unresolved; and
 - publishing a stable evidence schema now, because representative-case review
   remains required by ADR-027.
+
+## ADR-030: Runner boundary and execution interface v0
+
+**Status:** Accepted
+
+**Dependencies:** ADR-003, ADR-004, ADR-008, ADR-009, ADR-012, ADR-013,
+ADR-016, ADR-025, ADR-026, ADR-028, and ADR-029.
+
+The runner is an execution boundary, not a verdict authority.
+
+The core creates one bounded runner request for exactly one `baseline` or
+`candidate` side and one declared execution phase. The runner attempts that
+phase under the received policies and returns one factual, auditable execution
+record plus captured-artifact references. The core coordinates multiple phases
+and both sides. Phase names remain private-draft and illustrative; ADR-030 does
+not create a stable phase taxonomy.
+
+The core remains responsible for:
+
+- loading and validating the reproduction contract;
+- applying pre-execution eligibility rules and requiring mandatory controls;
+- materializing source under ADR-026 or accepting a trusted materialization
+  record from the responsible core component;
+- deriving runner requests from the accepted contract;
+- validating execution-record completeness, consistency, and policy status;
+- evaluating the atomic declarative oracle predicate under ADR-028;
+- assigning `PRESENT`, `ABSENT`, or `INDETERMINATE`;
+- selecting the bounded normative `failure_reason` for an `INDETERMINATE`
+  observation;
+- deriving the conclusion only from the normative observation-pair matrix; and
+- assembling or coordinating the authoritative evidence bundle under ADR-029,
+  or refusing a conclusion when its minimum audit chain is incomplete.
+
+The runner is responsible only for applying the received execution policies,
+attempting the declared phase, and returning observable facts. A conceptual
+runner request contains:
+
+- run identity, side, and one private-draft illustrative phase;
+- an already-materialized source reference;
+- command identity, declared working directory, and declared environment;
+- declared resource limits and network contract;
+- expected target configuration when applicable;
+- artifact-capture and redaction constraints; and
+- mandatory controls that must be applied and reported.
+
+Because the core relies on those execution facts and policy-status reports, a
+supported runner is part of the future trusted computing base for factual
+execution. That trust does not grant verdict authority. Concrete runner and
+backend selection, trust analysis, and conformance testing remain deferred.
+
+The runner must not fetch remotes, initialize submodules, acquire LFS content,
+use object alternates, honor replace refs, acquire partial-clone or promisor
+objects, rematerialize source, or otherwise weaken ADR-026.
+
+The factual execution record contains, at minimum conceptually:
+
+- side, execution-attempt identity, and runner identity when available or
+  explicit identity-unavailability status;
+- phase and command identity;
+- effective execution parameters as audit facts, not as a stable runner API;
+- applied-control and policy-enforcement status;
+- start and end timestamps;
+- process result, termination reason, timeout status, and resource-limit
+  status;
+- network-policy and materialized-source-access status;
+- captured-evidence and artifact references compatible with ADR-029;
+- infrastructure errors; and
+- bounded warnings.
+
+An execution record is an input to an evidence bundle, not the evidence bundle
+itself. The runner does not assemble an authoritative evidence bundle,
+reinterpret evidence, evaluate the oracle, assign an observation, select the
+normative `failure_reason`, or derive a comparative conclusion. Runner-reported
+failure labels and verdict-like labels are diagnostics only and are ignored by
+the core for normative classification.
+
+If a mandatory control cannot be applied before execution, the runner refuses
+the attempt and reports that execution did not start. No observation or
+comparative conclusion is produced; retained material may form only a
+non-conclusive attempt record under ADR-029.
+
+If the runner starts without a mandatory control, cannot report a mandatory
+policy status, or reports a post-start infrastructure failure, the execution is
+ineligible for an authoritative determinate observation. The core applies
+ADR-028, does not evaluate the predicate, and assigns `INDETERMINATE` with the
+applicable bounded normative `failure_reason`. Infrastructure failure must
+never become `ABSENT`. The runner must prefer fail-closed behavior.
+
+ADR-025 defines reproduction-network requirements; the runner applies them and
+reports factual policy status. ADR-026 defines source materialization policy;
+the runner receives an already-materialized reference and cannot weaken it.
+ADR-028 defines oracle evaluation, observations, and normative failure
+classification; the runner decides none of them. ADR-029 defines the minimum
+authoritative evidence bundle; runner execution records and artifact references
+are inputs to it, and the runner neither assembles the bundle nor recalculates
+its conclusion.
+
+The normative private-draft boundary fixture is
+[adr-030-runner-boundary.json](fixtures/adr-030-runner-boundary.json). It
+defines no stable runner API, phase taxonomy, backend contract, final
+serialization, or public compatibility promise.
+
+Rationale: a replaceable factual execution boundary keeps normative
+observation and conclusion semantics independent of any specific runtime. It
+also makes runner behavior testable through request and execution-record
+fixtures without prematurely selecting an implementation.
+
+Trade-offs:
+
+- an abstract boundary reduces backend coupling but must remain bounded to
+  avoid speculative architecture;
+- deferring backend selection preserves substitutability but delays real
+  isolation conformance testing;
+- separating execution from verdict authority improves auditability but
+  requires disciplined, complete execution records; and
+- denying the runner observation authority reduces flexibility but protects
+  Abaris's normative semantics.
+
+Non-goals and deferred decisions:
+
+- selecting or implementing Docker, Podman, local shell, a VM, Firecracker,
+  gVisor, Kata, nsjail, or any other runner, backend, or isolation technology;
+- selecting an implementation language, framework, validator, scheduler, CLI,
+  storage system, or final serialization;
+- defining a stable runner API, phase taxonomy, public schema, signature model,
+  or CI integration;
+- supporting private vulnerability handling, production execution, implicit
+  external network access, remote source acquisition, LFS, or submodules; and
+- allowing workload output, reproducer output, runner diagnostics, or raw logs
+  to override normative observations or conclusions.
+
+Rejected alternatives:
+
+- allowing the runner to assign observations or conclusions, because that
+  would make backend behavior a competing verdict authority;
+- allowing one opaque side-wide request, because per-phase factual records are
+  easier to audit and permit the core to retain orchestration authority;
+- accepting omitted mandatory-policy status, because the core could not
+  establish observation eligibility; and
+- selecting a concrete backend now, because ADR-019 and implementation-specific
+  conformance decisions remain unresolved.

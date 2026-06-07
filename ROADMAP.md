@@ -46,14 +46,17 @@ Accepted executable-specification increments:
   distinct non-conclusive attempt-record boundary;
 - the normative `private-draft` ADR-029 fixture illustrates one complete
   minimum bundle without defining a final serialization or public schema; and
+- ADR-030 defines a replaceable factual runner boundary that receives one
+  side-and-phase request and has no verdict or evidence-bundle authority;
+- the normative `private-draft` ADR-030 fixture defines conceptual runner
+  request and execution-record boundaries without selecting a backend or
+  stable API; and
 - the increments contain no runner, validator, production isolation backend,
   or public compatibility promise.
 
 Remaining planned deliverables:
 
-- resolve ADR-030 for the bounded runner boundary and interface without
-  selecting a production backend;
-- build one walking skeleton only after that boundary is accepted;
+- build one walking skeleton using the accepted runner boundary;
 - additional private, disposable draft experiment contracts;
 - table-driven fixtures for all nine observation pairs;
 - invariant fixtures proving `CANDIDATE_ONLY_PRESENT` is never success and
@@ -68,6 +71,13 @@ Remaining planned deliverables:
 This milestone may use narrowly scoped prototypes to learn from 3–5 curated
 historical cases, but it must not publish a stable schema or choose a production
 isolation backend.
+
+ADR-030 is the final recommended documentation decision before the walking
+skeleton. The skeleton may use an explicitly experimental, non-normative runner
+adapter, but it must not make that adapter a production-backend selection or
+allow backend-specific behavior to define core observation semantics. Concrete
+runner, backend, and isolation decisions follow only when representative
+execution evidence requires them.
 
 Representative cases must include:
 

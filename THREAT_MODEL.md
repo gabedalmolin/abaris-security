@@ -31,8 +31,8 @@ Out of scope:
 - The repository, revisions, build behavior, dependencies, reproducer, oracle
   inputs, and workload outputs may be malicious.
 - Curated public status does not imply executable trust.
-- The trusted control plane and selected isolation backend are not already
-  compromised.
+- The trusted control plane and future selected runner and isolation backend
+  are not already compromised.
 - A supported run is refused when mandatory controls cannot be verified.
 - The oracle observation is assigned by trusted deterministic evaluation, not
   accepted directly from workload output.
@@ -45,13 +45,14 @@ flowchart LR
   L["Local repository path"] --> M["Source materializer"]
   X["Curated reproducer and oracle"] --> C
   C --> M
-  M --> B["Baseline isolated run"]
-  M --> D["Candidate isolated run"]
-  C --> B
-  C --> D
-  B --> E["Trusted evidence and oracle evaluation"]
+  C --> U["Replaceable runner boundary"]
+  M --> U
+  U --> B["Baseline isolated phase attempts"]
+  U --> D["Candidate isolated phase attempts"]
+  B --> E["Factual execution records and artifacts"]
   D --> E
-  E --> R["Paired observations and conclusion"]
+  E --> T["Trusted evidence and oracle evaluation"]
+  T --> R["Paired observations and conclusion"]
   R --> A["Local evidence store"]
   A --> P["Explicit human export"]
 ```
@@ -62,6 +63,8 @@ flowchart LR
 | --- | --- | --- |
 | Operator to control plane | Paths, revisions, policy, export intent | Strict validation, explicit authorization acknowledgement, safe path handling |
 | Local repository to materializer | Git objects, files, submodules, metadata | No repository code execution, immutable resolution, bounded parsing, no working-tree mutation |
+| Trusted core to runner boundary | Materialized source reference, declared command, limits, network policy, capture policy, mandatory controls | One bounded side-and-phase request; no rematerialization or remote acquisition; runner has no verdict authority |
+| Runner boundary to trusted core | Execution status, effective parameters, policy status, diagnostics, captured evidence references | Factual bounded execution record; require mandatory-policy status; treat runner verdict-like labels as non-authoritative; fail closed on omissions |
 | Control plane to isolated runs | Source snapshots, setup, reproducer, limits, policy | No host secrets, home mounts, Docker socket, undeclared devices, privileges, or writable host paths |
 | Setup run to network | Dependency and setup traffic | Explicit policy, recorded destinations and outcomes where supported, no implicit access |
 | Reproduction participants to network | Local service traffic, potential probes, or exfiltration | No network for non-network cases; closed declared reproducer-target network for service cases; no external egress or host access |
@@ -77,6 +80,7 @@ flowchart LR
 | Isolation boundary and host availability | Confidentiality, integrity, and availability |
 | Immutable input identities | Integrity |
 | Oracle semantics and evaluation | Integrity |
+| Runner requests and factual execution records | Integrity and availability |
 | Evidence bundle and observation record | Integrity and availability |
 | Vulnerability details and artifacts | Confidentiality and integrity |
 | Publication decision | Integrity and confidentiality |
@@ -94,6 +98,9 @@ flowchart LR
   acquisition, remote helpers, or unsafe symlinks during materialization.
 - Forge or suppress evidence to obtain `PRESENT`, `ABSENT`, or a preferred
   conclusion.
+- Omit or falsify runner policy status, effective execution parameters, or
+  infrastructure failures.
+- Inject backend-specific labels into the core's normative verdict path.
 - Tamper with, omit, or selectively redact bundle content to make an
   incomplete result appear authoritative.
 - Exploit ambiguity between `ABSENT` and `INDETERMINATE`.
@@ -130,6 +137,11 @@ Root goal: harm the operator or cause a misleading Abaris result.
    - Present an attempt record as an authoritative evidence bundle.
    - Omit a captured artifact or alter a manifest reference.
    - Redact predicate evidence while preserving a determinate observation.
+7. Corrupt the runner boundary.
+   - Claim a mandatory control was applied when it was not.
+   - Omit mandatory-policy status after execution starts.
+   - Treat runner diagnostics or raw logs as normative observations.
+   - Couple core verdict semantics to backend-specific behavior.
 
 ## Threat model
 
@@ -150,6 +162,7 @@ Root goal: harm the operator or cause a misleading Abaris result.
 | TM-013 | Git materialization executes implicit behavior or resolves undeclared external objects | High without hardening | High | Critical | Abaris-controlled non-interactive Git environment; ignore inherited config; disable hooks, filters, credentials, LFS, submodules, external protocols, alternates, promisor acquisition, and replace refs; validate symlinks; prefer tree-object extraction |
 | TM-014 | A stable schema is published before real cases expose missing or unsafe semantics | Medium | Medium | Medium | Private disposable drafts and normative private-draft fixtures only; require 3–5 representative reviewed cases before public stability |
 | TM-015 | Tampered, incomplete, or selectively redacted evidence is presented as an authoritative completed result | Medium | High | High | Reserve authoritative evidence bundles for complete minimum audit chains; content-address captured artifacts and digest the manifest; keep incomplete attempts distinct and non-conclusive; record all redaction and invalidate determinate observations when predicate evidence changes |
+| TM-016 | Runner output omits or falsifies mandatory-policy status, claims verdict authority, or leaks backend-specific behavior into core semantics | Medium | High | High | Use one bounded side-and-phase request; require factual execution records and mandatory-policy status; treat runner failure and verdict labels as diagnostics only; keep oracle evaluation, normative failure classification, observations, conclusions, and bundle assembly in the core; perform backend conformance review before support |
 
 ## Security requirements
 
@@ -169,6 +182,7 @@ Root goal: harm the operator or cause a misleading Abaris result.
 | SR-012: Materialize Git source without implicit execution | Critical | TM-007, TM-013 | Conformance tests show hooks, filters, credentials, LFS, submodules, protocols, and unsafe symlinks cannot execute or escape policy; every attempt records controls, violations, and outcome |
 | SR-013: Gate public schema stability on representative cases | High | TM-014 | Every draft and executable-specification fixture self-identifies as `private-draft` with no compatibility guarantee; no stable schema is published before 3–5 reviewed cases meet documented diversity criteria |
 | SR-014: Emit only auditable authoritative evidence bundles | Critical | TM-004, TM-005, TM-006, TM-007, TM-009, TM-010, TM-015 | An authoritative bundle exists only when the minimum audit chain verifies the contract, applied policies, both observations, and conclusion derivation; incomplete pre-observation attempts produce no observations or conclusion; predicate-relevant redaction prevents the affected observation from remaining determinate |
+| SR-015: Keep the runner factual and non-authoritative | Critical | TM-001, TM-003, TM-004, TM-005, TM-008, TM-013, TM-015, TM-016 | The core sends one bounded side-and-phase request using already-materialized source; the runner returns a factual execution record with every mandatory-policy status; omitted or failed mandatory controls make the execution ineligible; runner diagnostics never set normative failure reasons, observations, conclusions, or evidence-bundle authority |
 
 ## Residual risks
 
@@ -188,6 +202,9 @@ Root goal: harm the operator or cause a misleading Abaris result.
   misleading contract or oracle.
 - An evidence bundle may contain sensitive public-vulnerability details and
   content digests do not make publication safe.
+- A compromised runner may falsely report applied controls or execution facts;
+  the conceptual boundary cannot replace implementation-specific conformance
+  testing and backend trust analysis.
 
 ## Required review triggers
 
@@ -200,6 +217,8 @@ Update this threat model before:
 - selecting the first target ecosystem;
 - changing oracle semantics or conclusion mapping;
 - changing evidence-bundle completeness, integrity, or redaction semantics;
+- changing the runner boundary, execution-record semantics, or runner
+  authority;
 - accepting community or private inputs;
 - adding hosted execution, AI influence, or automatic export; or
 - expanding any v0 exclusion.

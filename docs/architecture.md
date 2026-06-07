@@ -45,13 +45,12 @@ flowchart LR
   L["Local repository"] --> S["Source materializer"]
   P --> S
   P --> X["Experiment validator"]
-  S --> B["Baseline isolated run"]
-  S --> C["Candidate isolated run"]
-  X --> B
-  X --> C
-  B --> E["Trusted evidence and oracle evaluator"]
-  C --> E
-  E --> R["Observation pair and conclusion"]
+  S --> Q["Core runner-request coordinator"]
+  X --> Q
+  Q --> U["Replaceable runner boundary"]
+  U --> E["Factual execution records and artifacts"]
+  E --> T["Trusted evidence and oracle evaluator"]
+  T --> R["Observation pair and conclusion"]
   R --> A["Local content-addressed bundle"]
 ```
 
@@ -61,6 +60,12 @@ flowchart LR
 
 The control plane validates the experiment, checks policy, coordinates both
 runs, collects evidence, assigns observations, and derives the conclusion.
+
+For execution, the core derives one bounded runner request for exactly one
+`baseline` or `candidate` side and one declared phase. It coordinates all
+requests, validates returned execution records and mandatory-policy status,
+evaluates the oracle, assigns observations, derives the conclusion, and
+assembles or coordinates the authoritative evidence bundle.
 
 It must not:
 
@@ -118,6 +123,97 @@ It must reject:
 - missing setup-network or reproduction-network policy;
 - mutable required input identity; and
 - any comparison that cannot satisfy the equivalence contract.
+
+### Runner boundary
+
+The runner is an execution boundary, not a verdict authority.
+
+The core sends the replaceable runner boundary one conceptual request for one
+side and one declared execution phase. The runner applies the received
+policies, attempts the phase, and returns factual execution status and captured
+evidence references. The core coordinates multiple phases and both sides.
+Phase names are private-draft and illustrative; they do not define a stable
+taxonomy.
+
+A future runner may use a qualifying execution backend beneath this boundary.
+ADR-030 neither selects that backend nor permits backend-specific behavior to
+define core observation or conclusion semantics.
+
+A supported runner is part of the future trusted computing base for applying
+controls and reporting execution facts. It is not trusted to decide normative
+failure classification, observations, conclusions, or evidence-bundle
+authority. Concrete trust analysis and conformance testing remain deferred
+until a runner and backend are selected.
+
+A conceptual runner request contains:
+
+```text
+run identity
+baseline or candidate side
+one illustrative private-draft phase
+already-materialized source reference
+command identity, working directory, and declared environment
+resource limits and network contract
+optional target configuration
+artifact-capture and redaction constraints
+mandatory controls to apply and report
+```
+
+The runner receives source already materialized under ADR-026. It must not
+fetch remotes, initialize submodules, acquire LFS content, use object
+alternates, honor replace refs, acquire partial-clone or promisor objects,
+rematerialize source, or otherwise weaken the materialization policy.
+
+The returned execution record contains factual audit data:
+
+```text
+side and execution-attempt identity
+runner identity when available, or explicit unavailability
+phase and command identity
+effective execution parameters
+applied controls and policy-enforcement status
+start and end timestamps
+process result, termination reason, timeout, and resource-limit status
+network-policy and materialized-source-access status
+captured evidence and artifact references
+infrastructure errors and bounded warnings
+```
+
+Effective execution parameters are audit facts, not a stable public runner API.
+Runner-reported failure labels and verdict-like labels are diagnostics only.
+The core ignores them when assigning observations, selecting the bounded
+normative `failure_reason`, or deriving conclusions.
+
+An execution record is an input to the evidence bundle, not the evidence
+bundle itself. The runner does not assemble an authoritative evidence bundle,
+evaluate the oracle, assign `PRESENT`, `ABSENT`, or `INDETERMINATE`, select the
+normative `failure_reason`, or derive a comparative conclusion.
+
+If a mandatory control cannot be applied before execution, the runner must
+refuse the attempt and report that execution did not start. If execution starts
+without a mandatory control, the runner cannot report a mandatory-policy
+status, or a post-start infrastructure failure occurs, the core treats the
+execution as ineligible for an authoritative determinate observation and
+applies ADR-028. Infrastructure failure cannot become `ABSENT`.
+
+The normative flow is:
+
+```text
+contract
+-> pre-execution eligibility checks
+-> runner request
+-> factual execution record
+-> completion of ADR-028 eligibility gates by the core
+-> oracle evaluation by the core
+-> observation
+-> conclusion matrix
+-> evidence bundle
+```
+
+The normative private-draft runner-boundary fixture is
+[adr-030-runner-boundary.json](fixtures/adr-030-runner-boundary.json). It
+defines conceptual boundary examples, not a stable runner API, phase taxonomy,
+backend contract, or public schema.
 
 ### Execution backend
 
@@ -542,6 +638,8 @@ Human- and machine-readable output must not state or imply:
 - Setup-network policy modes and evidence requirements.
 - Dependency acquisition and immutable identity.
 - Rerun and nondeterminism policy.
+- Runner and backend implementation, conformance testing, and final interface
+  serialization.
 - Evidence serialization, retention, deletion, encryption, signing,
   authentication, independent verification tooling, and safe export review.
 - Exact support policy for submodules and external source mechanisms.

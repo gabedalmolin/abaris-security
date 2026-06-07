@@ -118,6 +118,69 @@ Direct tree-object extraction with safety validation is preferred. A sanitized
 checkout is only a possible bounded fallback. Remote source fetch, submodules,
 and LFS content are unsupported by default in v0.
 
+## Runner-boundary requirements
+
+The trusted core derives runner requests from the accepted private-draft
+experiment contract. Each request represents exactly one `baseline` or
+`candidate` side and one declared execution phase. The core coordinates
+multiple requests. Phase names are illustrative private-draft values and do
+not create a stable taxonomy.
+
+A conceptual runner request includes:
+
+- run identity, side, and phase;
+- an already-materialized source reference;
+- command identity, declared working directory, and declared environment;
+- declared limits and network contract;
+- expected target configuration when applicable;
+- artifact-capture and redaction constraints; and
+- mandatory controls that the runner must apply and report.
+
+The runner receives source already materialized under ADR-026. It must not
+fetch remotes, initialize submodules, acquire LFS content, use object
+alternates, honor replace refs, acquire partial-clone or promisor objects,
+rematerialize source, or otherwise weaken the accepted materialization policy.
+
+The runner returns one factual execution record containing, at minimum
+conceptually:
+
+- side, execution-attempt identity, and runner identity when available or
+  explicit identity-unavailability status;
+- phase and command identity;
+- effective execution parameters as audit facts;
+- applied-control and policy-enforcement status;
+- start and end timestamps;
+- process result, termination reason, timeout status, and resource-limit
+  status;
+- network-policy and materialized-source-access status;
+- captured-evidence and artifact references compatible with ADR-029;
+- infrastructure errors; and
+- bounded warnings.
+
+An execution record is an input to an evidence bundle, not the evidence bundle
+itself. The runner does not assemble the authoritative evidence bundle,
+evaluate the oracle, assign an observation, select a normative
+`failure_reason`, or derive a conclusion. Runner-reported failure or
+verdict-like labels are diagnostics only and are ignored by the core for
+normative classification.
+
+If a mandatory control cannot be applied before execution, the runner must
+refuse the attempt and report that execution did not start. If a mandatory
+control or mandatory-policy status is absent after execution starts, the core
+treats the execution as ineligible for an authoritative determinate
+observation and applies ADR-028. Infrastructure failure cannot become
+`ABSENT`.
+
+The runner request, phase names, effective execution parameters, and execution
+record are private-draft conceptual interfaces. This specification does not
+select a runner, backend, implementation language, stable API, final
+serialization, or public schema.
+
+The normative private-draft boundary fixture is
+[adr-030-runner-boundary.json](fixtures/adr-030-runner-boundary.json). It is an
+executable specification of conceptual boundaries, not a stable runner
+interface.
+
 ## Reproducer requirements
 
 The same content-identified reproducer is applied to both revisions.
@@ -494,6 +557,8 @@ The specification must not contain behavior for:
 - Evidence retention and deletion, redaction policy and serialization,
   encryption, signing, authentication, independent verification tooling, and
   safe export review.
+- Runner and backend implementation, conformance testing, and final interface
+  serialization.
 
 These decisions must be informed by the representative-case stabilization gate,
 not by designing a broad speculative schema.
