@@ -1,0 +1,272 @@
+{
+  "schema": {
+    "id": "dev.abaris.private-draft.adr-029-evidence-bundle-minimum-fixture.v0",
+    "stability": "private-draft",
+    "compatibility": "none"
+  },
+  "decision": "ADR-029",
+  "fixture_purpose": "Normative minimum-content and boundary examples, not a final evidence-bundle serialization or public schema.",
+  "digest_placeholder_convention": {
+    "format": "sha256:EXAMPLE_PLACEHOLDER_<LABEL>",
+    "placeholders_are_real_digests": false
+  },
+  "invariants": {
+    "authoritative_bundle_requires_complete_minimum_audit_chain": true,
+    "minimum_audit_chain_verifies": [
+      "experiment_contract",
+      "applied_policies",
+      "baseline_observation",
+      "candidate_observation",
+      "conclusion_derivation"
+    ],
+    "incomplete_chain_before_observation_assignment_produces_observations": false,
+    "incomplete_chain_before_observation_assignment_produces_comparative_conclusion": false,
+    "incomplete_chain_before_observation_assignment_produces_authoritative_bundle": false,
+    "incomplete_attempt_may_produce_distinct_non_conclusive_attempt_record": true,
+    "attempt_record_schema_defined": false,
+    "bundle_recalculates_observations_or_conclusion": false,
+    "raw_evidence_overrides_assigned_observation_or_conclusion": false,
+    "predicate_relevant_redaction_preserves_determinate_observation": false,
+    "human_report_rendering_defined": false,
+    "hashes_detect_retained_content_changes": true,
+    "hashes_authenticate_producer": false,
+    "hashes_provide_non_repudiation": false,
+    "hashes_prove_completeness_or_correctness": false,
+    "hashes_protect_confidentiality": false,
+    "hashes_make_publication_safe": false
+  },
+  "required_conceptual_sections": [
+    "identity",
+    "authority",
+    "subjects",
+    "experiment_contract",
+    "source_materialization",
+    "environment",
+    "applied_policies",
+    "baseline_run",
+    "candidate_run",
+    "paired_result",
+    "captured_artifacts",
+    "manifest",
+    "integrity",
+    "redaction",
+    "warnings",
+    "limitations",
+    "non_goals"
+  ],
+  "minimum_authoritative_bundle_example": {
+    "identity": {
+      "bundle_id": "EXAMPLE_BUNDLE_ID",
+      "run_id": "EXAMPLE_RUN_ID",
+      "created_at": "2000-01-01T00:00:00Z",
+      "tool": {
+        "name": "Abaris",
+        "version": "EXAMPLE_TOOL_VERSION",
+        "identity_digest": "sha256:EXAMPLE_PLACEHOLDER_TOOL_IDENTITY"
+      },
+      "evidence_bundle_contract": {
+        "id": "dev.abaris.private-draft.evidence-bundle.v0",
+        "stability": "private-draft",
+        "compatibility": "none"
+      },
+      "experiment_contract_schema": {
+        "id": "dev.abaris.private-draft.experiment.v0",
+        "stability": "private-draft",
+        "compatibility": "none"
+      }
+    },
+    "authority": {
+      "status": "authoritative",
+      "minimum_audit_chain_complete": true,
+      "verifies_contract_policies_observations_and_conclusion_derivation": true
+    },
+    "subjects": {
+      "repository_input": "EXAMPLE_LOCAL_REPOSITORY_PATH",
+      "baseline": {
+        "requested_ref": "EXAMPLE_BASELINE_REF",
+        "resolved_commit": "EXAMPLE_BASELINE_COMMIT_ID",
+        "resolved_tree": "EXAMPLE_BASELINE_TREE_ID",
+        "snapshot_digest": "sha256:EXAMPLE_PLACEHOLDER_BASELINE_SNAPSHOT"
+      },
+      "candidate": {
+        "requested_ref": "EXAMPLE_CANDIDATE_REF",
+        "resolved_commit": "EXAMPLE_CANDIDATE_COMMIT_ID",
+        "resolved_tree": "EXAMPLE_CANDIDATE_TREE_ID",
+        "snapshot_digest": "sha256:EXAMPLE_PLACEHOLDER_CANDIDATE_SNAPSHOT"
+      }
+    },
+    "experiment_contract": {
+      "specification_digest": "sha256:EXAMPLE_PLACEHOLDER_EXPERIMENT_CONTRACT",
+      "reproducer_digest": "sha256:EXAMPLE_PLACEHOLDER_REPRODUCER",
+      "oracle": {
+        "digest": "sha256:EXAMPLE_PLACEHOLDER_ORACLE",
+        "predicate_kind": "process_exit_code_equals"
+      },
+      "comparison_digest": "sha256:EXAMPLE_PLACEHOLDER_COMPARISON",
+      "permitted_differences": [
+        "source_revision"
+      ]
+    },
+    "source_materialization": {
+      "policy_digest": "sha256:EXAMPLE_PLACEHOLDER_MATERIALIZATION_POLICY",
+      "controls": {
+        "hooks": "disabled",
+        "filters": "disabled",
+        "credential_helpers": "disabled",
+        "submodules": "rejected",
+        "lfs": "rejected",
+        "alternates": "rejected",
+        "replace_refs": "rejected",
+        "promisor_or_partial_clone_acquisition": "rejected"
+      },
+      "baseline_record_digest": "sha256:EXAMPLE_PLACEHOLDER_BASELINE_MATERIALIZATION_RECORD",
+      "candidate_record_digest": "sha256:EXAMPLE_PLACEHOLDER_CANDIDATE_MATERIALIZATION_RECORD"
+    },
+    "environment": {
+      "platform": "EXAMPLE_SUPPORTED_PLATFORM",
+      "identity_digest": "sha256:EXAMPLE_PLACEHOLDER_ENVIRONMENT",
+      "identity_available": true
+    },
+    "applied_policies": {
+      "setup_network_policy_digest": "sha256:EXAMPLE_PLACEHOLDER_SETUP_NETWORK_POLICY",
+      "reproduction_network_policy_digest": "sha256:EXAMPLE_PLACEHOLDER_CLOSED_REPRODUCTION_NETWORK_POLICY",
+      "resource_limits_digest": "sha256:EXAMPLE_PLACEHOLDER_RESOURCE_LIMITS"
+    },
+    "baseline_run": {
+      "declared_command": [
+        "EXAMPLE_EXECUTABLE",
+        "EXAMPLE_ARGUMENT"
+      ],
+      "started_at": "2000-01-01T00:00:01Z",
+      "completed_at": "2000-01-01T00:00:02Z",
+      "execution_status": "completed",
+      "observation": "PRESENT",
+      "failure_reason": null,
+      "oracle_evaluation_record_digest": "sha256:EXAMPLE_PLACEHOLDER_BASELINE_ORACLE_EVALUATION",
+      "captured_artifact_refs": [
+        "artifact:baseline-stderr"
+      ]
+    },
+    "candidate_run": {
+      "declared_command": [
+        "EXAMPLE_EXECUTABLE",
+        "EXAMPLE_ARGUMENT"
+      ],
+      "started_at": "2000-01-01T00:00:03Z",
+      "completed_at": "2000-01-01T00:00:04Z",
+      "execution_status": "completed",
+      "observation": "ABSENT",
+      "failure_reason": null,
+      "oracle_evaluation_record_digest": "sha256:EXAMPLE_PLACEHOLDER_CANDIDATE_ORACLE_EVALUATION",
+      "captured_artifact_refs": [
+        "artifact:candidate-stderr"
+      ]
+    },
+    "paired_result": {
+      "baseline_observation": "PRESENT",
+      "candidate_observation": "ABSENT",
+      "conclusion": "REPRODUCER_BLOCKED",
+      "derivation": "ADR-004_NORMATIVE_OBSERVATION_PAIR_MATRIX",
+      "reinterprets_raw_execution": false
+    },
+    "captured_artifacts": [
+      {
+        "ref": "artifact:baseline-stderr",
+        "provenance": "baseline_run.stderr",
+        "digest": "sha256:EXAMPLE_PLACEHOLDER_BASELINE_STDERR",
+        "availability": "preserved"
+      },
+      {
+        "ref": "artifact:candidate-stderr",
+        "provenance": "candidate_run.stderr",
+        "digest": "sha256:EXAMPLE_PLACEHOLDER_CANDIDATE_STDERR",
+        "availability": "preserved"
+      }
+    ],
+    "manifest": {
+      "referenced_digests": [
+        "sha256:EXAMPLE_PLACEHOLDER_TOOL_IDENTITY",
+        "sha256:EXAMPLE_PLACEHOLDER_BASELINE_SNAPSHOT",
+        "sha256:EXAMPLE_PLACEHOLDER_CANDIDATE_SNAPSHOT",
+        "sha256:EXAMPLE_PLACEHOLDER_EXPERIMENT_CONTRACT",
+        "sha256:EXAMPLE_PLACEHOLDER_REPRODUCER",
+        "sha256:EXAMPLE_PLACEHOLDER_ORACLE",
+        "sha256:EXAMPLE_PLACEHOLDER_COMPARISON",
+        "sha256:EXAMPLE_PLACEHOLDER_MATERIALIZATION_POLICY",
+        "sha256:EXAMPLE_PLACEHOLDER_BASELINE_MATERIALIZATION_RECORD",
+        "sha256:EXAMPLE_PLACEHOLDER_CANDIDATE_MATERIALIZATION_RECORD",
+        "sha256:EXAMPLE_PLACEHOLDER_ENVIRONMENT",
+        "sha256:EXAMPLE_PLACEHOLDER_SETUP_NETWORK_POLICY",
+        "sha256:EXAMPLE_PLACEHOLDER_CLOSED_REPRODUCTION_NETWORK_POLICY",
+        "sha256:EXAMPLE_PLACEHOLDER_RESOURCE_LIMITS",
+        "sha256:EXAMPLE_PLACEHOLDER_BASELINE_ORACLE_EVALUATION",
+        "sha256:EXAMPLE_PLACEHOLDER_CANDIDATE_ORACLE_EVALUATION",
+        "sha256:EXAMPLE_PLACEHOLDER_BASELINE_STDERR",
+        "sha256:EXAMPLE_PLACEHOLDER_CANDIDATE_STDERR"
+      ]
+    },
+    "integrity": {
+      "digest_algorithm": "sha256",
+      "captured_artifact_digests_referenced_by_manifest": true,
+      "manifest_digest": "sha256:EXAMPLE_PLACEHOLDER_MANIFEST",
+      "claim": "tamper-evident-retained-content-only"
+    },
+    "redaction": {
+      "applied": false,
+      "categories_preserved": [
+        "predicate_evidence",
+        "materialization_records",
+        "policy_records"
+      ],
+      "categories_transformed": [],
+      "categories_redacted": [],
+      "categories_omitted": []
+    },
+    "warnings": [
+      "All hash-like values in this fixture are explicitly identified example placeholders."
+    ],
+    "limitations": [
+      "The conclusion applies only to the declared reproducer, oracle, and recorded conditions.",
+      "Content digests do not authenticate the producer or prove completeness, correctness, confidentiality, or safe publication."
+    ],
+    "non_goals": [
+      "human_report_rendering",
+      "attempt_record_schema",
+      "public_schema",
+      "producer_authentication",
+      "non_repudiation",
+      "safe_publication"
+    ]
+  },
+  "boundary_cases": [
+    {
+      "id": "minimum-chain-incomplete-before-observation-assignment",
+      "stage": "before_observation_assignment",
+      "missing_audit_evidence": [
+        "applied_reproduction_network_policy"
+      ],
+      "expected_record_kind": "attempt_record",
+      "expected_observations": null,
+      "expected_comparative_conclusion": null,
+      "expected_authoritative_bundle": false
+    },
+    {
+      "id": "predicate-relevant-evidence-redacted-after-execution-start",
+      "stage": "after_execution_start",
+      "redaction_effect": "predicate_relevant_evidence_unavailable",
+      "expected_affected_observation": "INDETERMINATE",
+      "expected_affected_failure_reason": "EVIDENCE_MISSING",
+      "expected_determinate_observation_preserved": false
+    },
+    {
+      "id": "bundle-level-audit-chain-incomplete",
+      "stage": "after_observation_assignment",
+      "missing_audit_evidence": [
+        "conclusion_derivation_record"
+      ],
+      "expected_record_kind": "attempt_record",
+      "expected_authoritative_comparative_conclusion": null,
+      "expected_authoritative_bundle": false
+    }
+  ]
+}

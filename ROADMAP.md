@@ -22,6 +22,9 @@ Exit criteria:
 - Isolation, resource, secret, mount, and host-socket requirements are
   traceable to threats.
 - Immutable input identities and content-addressed evidence are specified.
+- The minimum authoritative evidence-bundle audit chain, tamper-evident
+  integrity model, redaction semantics, and attempt-record boundary are
+  specified.
 - Stable public schemas are gated on 3–5 reviewed representative cases.
 - v0 exclusions are treated as enforceable product boundaries.
 - Major unresolved decisions remain explicit.
@@ -31,19 +34,27 @@ Exit criteria:
 Objective: exercise private draft contracts against representative cases before
 stabilizing any public schema or building a general runner.
 
-Accepted first executable-specification increment:
+Accepted executable-specification increments:
 
 - ADR-028 defines ordered fail-closed observation eligibility, one atomic
   declarative oracle predicate, and one primary bounded failure reason;
 - the normative `private-draft` ADR-028 decision-table fixture covers every
   supported predicate's true and false outcomes, every bounded failure reason,
   precedence, invariants, and rejected oracle contracts; and
-- the increment contains no runner, validator, production isolation backend, or
-  public compatibility promise.
+- ADR-029 defines the minimum authoritative evidence-bundle audit chain,
+  tamper-evident content-digest model, explicit redaction semantics, and the
+  distinct non-conclusive attempt-record boundary;
+- the normative `private-draft` ADR-029 fixture illustrates one complete
+  minimum bundle without defining a final serialization or public schema; and
+- the increments contain no runner, validator, production isolation backend,
+  or public compatibility promise.
 
 Remaining planned deliverables:
 
-- additional private, disposable draft experiment and evidence contracts;
+- resolve ADR-030 for the bounded runner boundary and interface without
+  selecting a production backend;
+- build one walking skeleton only after that boundary is accepted;
+- additional private, disposable draft experiment contracts;
 - table-driven fixtures for all nine observation pairs;
 - invariant fixtures proving `CANDIDATE_ONLY_PRESENT` is never success and
   `INCONCLUSIVE` occurs only when at least one observation is `INDETERMINATE`;
@@ -169,6 +180,7 @@ or patch correctness.
 - What exact setup-network policy modes are supported?
 - How are setup dependencies acquired, pinned, cached, and attributed?
 - What rerun policy is required before stable observations are accepted?
-- What evidence is retained, redacted, encrypted, or excluded by default?
+- What retention, deletion, default redaction, encryption, signing,
+  authentication, and independent-verification policies are required?
 - What schema and compatibility policy should be published after the
   representative-case stabilization gate?

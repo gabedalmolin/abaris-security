@@ -36,12 +36,13 @@ Status values:
 | ADR-020 | Open | Setup-network policy modes and dependency acquisition |
 | ADR-021 | Superseded | Oracle evaluation, observation assignment, and failure-reason model |
 | ADR-022 | Open | Nondeterminism and rerun policy |
-| ADR-023 | Open | Evidence schema and protection |
+| ADR-023 | Open | Evidence serialization, lifecycle, confidentiality, and authentication |
 | ADR-024 | Accepted | `CANDIDATE_ONLY_PRESENT` is a blocking comparative conclusion |
 | ADR-025 | Accepted | Networked reproduction uses a closed per-run reproducer-target network |
 | ADR-026 | Accepted | Local Git source is materialized under a hardened no-implicit-execution policy |
 | ADR-027 | Accepted | Public schema stability is gated on 3–5 representative historical cases |
 | ADR-028 | Accepted | Observation assignment uses ordered eligibility gates and one atomic declarative oracle predicate |
+| ADR-029 | Accepted | A finalized evidence bundle preserves a minimum auditable result and tamper-evident integrity record |
 
 ## ADR-001: Narrow product identity
 
@@ -297,17 +298,21 @@ Decision criteria:
 - when instability forces `INDETERMINATE`; and
 - evidence presentation.
 
-## ADR-023: Evidence schema and protection
+## ADR-023: Evidence serialization, lifecycle, confidentiality, and authentication
 
 **Status:** Open
 
-Decision criteria:
+ADR-029 resolves the minimum conceptual contents, completeness boundary,
+content-digest requirements, and redaction semantics for a finalized evidence
+bundle.
 
-- manifest and content-addressing model;
+Remaining decision criteria:
+
+- final serialization and schema technology;
 - retention and deletion;
-- redaction and truncation;
-- encryption and signing;
-- independent verification; and
+- confidentiality and encryption;
+- signing, key management, authentication, and non-repudiation;
+- independent verification tooling; and
 - safe export review.
 
 Public schema stability is separately governed by ADR-027.
@@ -512,3 +517,89 @@ Rejected alternatives:
   metadata, because failure could collapse into `ABSENT`; and
 - general-purpose or unbounded regular expressions, because they create denial
   of service and cross-engine determinism risk.
+
+## ADR-029: Evidence bundle minimum contents and integrity model
+
+**Status:** Accepted
+
+**Dependencies:** ADR-003, ADR-004, ADR-009, ADR-013, ADR-014, ADR-015,
+ADR-025, ADR-026, ADR-027, and ADR-028.
+
+A finalized evidence bundle is a local, self-describing, auditable artifact for
+one completed paired result. It preserves the declared experiment contract,
+source and materialization identities, enforced policies, baseline and
+candidate executions, assigned observations, bounded failure reasons,
+captured artifacts, deterministic conclusion derivation, limitations, and
+integrity metadata.
+
+An evidence bundle is finalized only when it contains the minimum audit chain
+needed to verify:
+
+- the private-draft evidence-bundle contract identity and experiment-contract
+  identity and digest;
+- immutable subject identities and materialization controls;
+- comparison, network, and resource-limit policies, plus environment and
+  platform identity when available or explicit availability status otherwise;
+- both execution and oracle-evaluation records;
+- both assigned observations and any required primary `failure_reason`;
+- the conclusion derived only from the normative observation-pair matrix; and
+- the manifest, captured-artifact digests, explicit omissions, redactions,
+  truncations, warnings, and limitations.
+
+Invalid contracts, unavailable mandatory controls, or an incomplete minimum
+audit chain detected before observation assignment produce no observations or
+conclusion and cannot produce a finalized authoritative evidence bundle. They
+may be preserved, when possible, as a distinct local, non-conclusive attempt
+record. The attempt-record serialization and stable schema remain unresolved.
+
+After execution begins, insufficient predicate evidence makes the affected
+observation `INDETERMINATE` under ADR-028. A finalized bundle may preserve that
+paired result only when the remaining minimum audit chain is complete. Missing
+evidence that prevents audit of the contract, materialization, policies,
+observation pair, conclusion derivation, or manifest integrity prevents an
+authoritative bundle and conclusion; any retained partial material remains an
+attempt record.
+
+Every captured artifact has a content digest. The manifest references those
+digests and has its own digest. This makes retained content tamper-evident; it
+does not authenticate the producer, provide non-repudiation, prove
+completeness or correctness, protect confidentiality, or make evidence safe to
+publish.
+
+Redaction is permitted only when it is explicit and attributable. The bundle
+records what categories were preserved, transformed, redacted, or omitted and
+retains digest relationships where applicable. Redaction must not silently
+change an observation. Removing, changing, or making unavailable evidence
+required by the oracle means the affected observation cannot remain `PRESENT`
+or `ABSENT`; it becomes `INDETERMINATE` or is not produced, according to the
+ADR-028 execution stage. Removing evidence required for the minimum audit chain
+prevents an authoritative bundle.
+
+The bundle preserves assigned observations and the conclusion derived from
+them. It does not independently reinterpret raw execution records, advisory
+metadata, or workload output, and raw logs cannot override an assigned
+observation or conclusion.
+
+The normative private-draft minimum-content fixture is
+[adr-029-evidence-bundle-minimum.json](fixtures/adr-029-evidence-bundle-minimum.json).
+It defines preserved evidence concepts, not human-report rendering, an
+attempt-record schema, a public schema, or a compatibility promise.
+
+Rationale: a bounded minimum makes results inspectable without prematurely
+choosing a final format or protection system. Separating incomplete attempts
+from finalized evidence bundles prevents missing audit evidence from being
+presented as a conclusive result. Content addressing provides a useful
+tamper-evidence baseline while preserving honest limits.
+
+Rejected alternatives:
+
+- treating every partial attempt as an evidence bundle, because missing audit
+  evidence could be mistaken for a completed result;
+- allowing the bundle to recalculate observations or conclusions from raw
+  logs, because that would create a second conflicting authority;
+- permitting silent or predicate-relevant redaction, because it could change
+  result semantics without an explicit eligibility failure;
+- requiring cryptographic signing in v0, because producer authentication, key
+  management, and trust roots remain unresolved; and
+- publishing a stable evidence schema now, because representative-case review
+  remains required by ADR-027.

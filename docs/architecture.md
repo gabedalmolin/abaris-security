@@ -457,27 +457,71 @@ conditions.
 
 ## Evidence bundle
 
-A future evidence bundle should contain:
+A finalized authoritative evidence bundle is a local audit artifact for one
+completed paired result. It exists only when its minimum audit chain permits a
+reviewer or independent verifier to verify the declared contract, applied
+policies, baseline and candidate observations, and deterministic conclusion
+derivation.
+
+The minimum audit chain contains:
 
 ```text
-manifest
-input identities
-source materialization records
-comparison contract
-setup and reproduction policies
-environment identities
-baseline observations and artifacts
-candidate observations and artifacts
-per-run failure reasons where indeterminate
-oracle evaluation records
-paired observations
-derived conclusion
-limitations and violations
+bundle identity, private-draft evidence-bundle and experiment-contract identities
+tool identity and timestamps
+requested source references and resolved commit, tree, and snapshot identities
+source materialization controls, records, violations, and outcomes
+reproducer, oracle, comparison, network, and limit policy identities
+environment and platform identity when available, or explicit availability status
+baseline and candidate execution, collection, oracle-evaluation, and observation records
+one primary failure reason for each indeterminate observation
+captured artifact references, provenance, digests, and availability status
+paired observations and the conclusion derived from the normative matrix
+manifest digest, redaction record, warnings, limitations, and non-goals
 ```
 
-Every retained object must have a content digest and provenance. Required
-missing, redacted, or truncated content must be explicit and must affect
-observation eligibility.
+The bundle preserves the observations assigned under ADR-028 and the conclusion
+derived from their pair under ADR-004. It does not independently reinterpret
+raw execution records, workload output, advisory metadata, or captured logs.
+Raw evidence cannot override an assigned observation or conclusion.
+
+### Completeness boundary
+
+If the minimum audit chain is incomplete before observation assignment, Abaris
+may preserve a distinct local attempt record, but it must not produce
+observations, an authoritative evidence bundle, or a comparative conclusion.
+ADR-029 defines the existence and conceptual boundary of that non-conclusive
+attempt record, not its serialization or stable schema.
+
+After execution begins, missing, invalid, ambiguous, or truncated
+predicate-relevant evidence makes the affected observation `INDETERMINATE`
+under ADR-028. A finalized authoritative bundle may preserve that result only
+when the remaining minimum audit chain permits audit of the contract, policies,
+both observations, and conclusion derivation.
+
+If required bundle-level audit evidence is unavailable, the partial material
+is not an authoritative evidence bundle and carries no authoritative
+comparative conclusion.
+
+### Integrity and redaction
+
+Every captured artifact must have provenance and a content digest. The manifest
+references captured-artifact digests and has its own digest. Verification can
+therefore detect changes to retained content, but cannot authenticate the
+producer, provide non-repudiation, prove completeness or correctness, protect
+confidentiality, or make evidence safe to publish.
+
+Missing, transformed, redacted, omitted, or truncated content must be explicit.
+The redaction record identifies categories preserved, transformed, redacted,
+and omitted. Redaction must not silently alter result semantics. If redaction
+removes, changes, or makes unavailable evidence relevant to the atomic
+predicate, the affected observation cannot remain `PRESENT` or `ABSENT`; it
+becomes `INDETERMINATE` or is not produced, according to the ADR-028 execution
+stage.
+
+Cryptographic signing, key management, producer authentication,
+non-repudiation, confidentiality controls, and independent verification
+tooling remain unresolved. ADR-029 defines preserved evidence, not human-report
+rendering or a public compatibility contract.
 
 ## Unsupported claim controls
 
@@ -498,7 +542,8 @@ Human- and machine-readable output must not state or imply:
 - Setup-network policy modes and evidence requirements.
 - Dependency acquisition and immutable identity.
 - Rerun and nondeterminism policy.
-- Evidence schema, retention, redaction, encryption, and signing.
+- Evidence serialization, retention, deletion, encryption, signing,
+  authentication, independent verification tooling, and safe export review.
 - Exact support policy for submodules and external source mechanisms.
 
 ## Schema stabilization gate

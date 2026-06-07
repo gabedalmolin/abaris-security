@@ -66,7 +66,7 @@ flowchart LR
 | Setup run to network | Dependency and setup traffic | Explicit policy, recorded destinations and outcomes where supported, no implicit access |
 | Reproduction participants to network | Local service traffic, potential probes, or exfiltration | No network for non-network cases; closed declared reproducer-target network for service cases; no external egress or host access |
 | Workload to trusted evaluator | Logs, files, status, signals, artifacts | Treat as untrusted, bound sizes, record provenance, evaluate oracle outside workload authority |
-| Evidence store to export | Potentially sensitive evidence | Local by default, explicit human action, destination and content review |
+| Evidence store to export | Potentially sensitive evidence | Local by default, explicit human action, destination and content review; redaction cannot silently preserve a determinate observation after changing predicate evidence |
 
 ## Assets
 
@@ -94,6 +94,8 @@ flowchart LR
   acquisition, remote helpers, or unsafe symlinks during materialization.
 - Forge or suppress evidence to obtain `PRESENT`, `ABSENT`, or a preferred
   conclusion.
+- Tamper with, omit, or selectively redact bundle content to make an
+  incomplete result appear authoritative.
 - Exploit ambiguity between `ABSENT` and `INDETERMINATE`.
 - Manipulate source identity or comparison conditions between revisions.
 - Place secrets or sensitive content in evidence to induce disclosure.
@@ -124,6 +126,10 @@ Root goal: harm the operator or cause a misleading Abaris result.
    - Insert sensitive content into evidence.
    - Trigger an implicit export.
    - Misrepresent public-corpus status.
+6. Misrepresent an incomplete or modified result.
+   - Present an attempt record as an authoritative evidence bundle.
+   - Omit a captured artifact or alter a manifest reference.
+   - Redact predicate evidence while preserving a determinate observation.
 
 ## Threat model
 
@@ -143,6 +149,7 @@ Root goal: harm the operator or cause a misleading Abaris result.
 | TM-012 | AI-generated output influences deterministic observations or conclusions | Low in v0 | High | Medium | No AI dependency or authority in eligibility gates, predicate evaluation, observation assignment, failure classification, or conclusion derivation; preserve deterministic decision path |
 | TM-013 | Git materialization executes implicit behavior or resolves undeclared external objects | High without hardening | High | Critical | Abaris-controlled non-interactive Git environment; ignore inherited config; disable hooks, filters, credentials, LFS, submodules, external protocols, alternates, promisor acquisition, and replace refs; validate symlinks; prefer tree-object extraction |
 | TM-014 | A stable schema is published before real cases expose missing or unsafe semantics | Medium | Medium | Medium | Private disposable drafts and normative private-draft fixtures only; require 3–5 representative reviewed cases before public stability |
+| TM-015 | Tampered, incomplete, or selectively redacted evidence is presented as an authoritative completed result | Medium | High | High | Reserve authoritative evidence bundles for complete minimum audit chains; content-address captured artifacts and digest the manifest; keep incomplete attempts distinct and non-conclusive; record all redaction and invalidate determinate observations when predicate evidence changes |
 
 ## Security requirements
 
@@ -154,13 +161,14 @@ Root goal: harm the operator or cause a misleading Abaris result.
 | SR-004: Assign observations through trusted three-state oracle evaluation | Critical | TM-004, TM-005, TM-011 | Invalid contracts produce no observations; accepted runs apply ordered eligibility gates before one atomic predicate; unreliable evaluation yields `INDETERMINATE` with exactly one bounded primary reason; determinate observations have no failure reason |
 | SR-005: Preserve comparison equivalence | Critical | TM-006 | Reproducer, oracle, policy, environment contract, and permitted differences are content-identified and checked before predicate evaluation for both runs |
 | SR-006: Resolve immutable input identities | High | TM-007 | Every accepted run records exact source, reproducer, oracle, environment, policy, and declared setup-input identities |
-| SR-007: Preserve content-addressed evidence | High | TM-004, TM-005, TM-007 | Every retained evidence object has provenance, digest, and explicit omission or truncation status |
+| SR-007: Preserve content-addressed evidence | High | TM-004, TM-005, TM-007, TM-015 | Every captured artifact has provenance and a digest; the manifest references captured-artifact digests and has its own digest; omissions, transformations, redactions, and truncations are explicit |
 | SR-008: Enforce resource limits outside the workload | High | TM-008 | CPU, memory, processes, disk, output, and wall-clock limits are enforced; invalidating limit or timeout events prevent predicate evaluation and are preserved |
 | SR-009: Keep observations primary and conclusions conservative | Critical | TM-009 | Every result displays both observations; all nine pairs follow the documented matrix; output contains claim limitations |
 | SR-010: Require human-controlled publication | Critical | TM-010 | No evidence or conclusion leaves local storage without explicit human export |
 | SR-011: Keep AI outside the deterministic core | High | TM-012 | Eligibility, predicate evaluation, observation, failure classification, and conclusion provenance contain no AI-dependent decision step |
 | SR-012: Materialize Git source without implicit execution | Critical | TM-007, TM-013 | Conformance tests show hooks, filters, credentials, LFS, submodules, protocols, and unsafe symlinks cannot execute or escape policy; every attempt records controls, violations, and outcome |
 | SR-013: Gate public schema stability on representative cases | High | TM-014 | Every draft and executable-specification fixture self-identifies as `private-draft` with no compatibility guarantee; no stable schema is published before 3–5 reviewed cases meet documented diversity criteria |
+| SR-014: Emit only auditable authoritative evidence bundles | Critical | TM-004, TM-005, TM-006, TM-007, TM-009, TM-010, TM-015 | An authoritative bundle exists only when the minimum audit chain verifies the contract, applied policies, both observations, and conclusion derivation; incomplete pre-observation attempts produce no observations or conclusion; predicate-relevant redaction prevents the affected observation from remaining determinate |
 
 ## Residual risks
 
@@ -176,6 +184,10 @@ Root goal: harm the operator or cause a misleading Abaris result.
   documentation.
 - Content addressing demonstrates integrity and identity, not correctness,
   completeness, confidentiality, or safety.
+- A structurally complete and internally consistent bundle may preserve a
+  misleading contract or oracle.
+- An evidence bundle may contain sensitive public-vulnerability details and
+  content digests do not make publication safe.
 
 ## Required review triggers
 
@@ -187,6 +199,7 @@ Update this threat model before:
 - enabling LFS, submodules, remote Git source, or checkout-based materialization;
 - selecting the first target ecosystem;
 - changing oracle semantics or conclusion mapping;
+- changing evidence-bundle completeness, integrity, or redaction semantics;
 - accepting community or private inputs;
 - adding hosted execution, AI influence, or automatic export; or
 - expanding any v0 exclusion.

@@ -313,15 +313,19 @@ may cause `INDETERMINATE`.
 
 Required evidence includes:
 
+- bundle identity, run identity, tool identity, creation time, and the
+  private-draft evidence-bundle contract identity;
 - experiment contract identity, `private-draft` stability, compatibility
   posture, and specification digest;
 - public-case provenance;
-- exact baseline and candidate commit and snapshot digests;
+- requested baseline and candidate references and exact resolved commit, tree,
+  and snapshot digests;
 - source-materialization policy, requested and enforced controls, tool versions,
   rejected features, violations, and outcome;
 - reproducer and oracle digests;
 - comparison-contract digest;
-- environment and execution-backend identity;
+- environment, platform, and execution-backend identity when available, or
+  explicit availability status otherwise;
 - setup and reproduction network policies;
 - resource-limit policy and violations;
 - step status, exit status, signal, timeout, and termination reason;
@@ -329,14 +333,49 @@ Required evidence includes:
 - declared artifact provenance and digests;
 - oracle evaluation inputs and result;
 - a bounded `failure_reason` for every `INDETERMINATE` observation; and
-- explicit omissions, contradictions, and unsupported conditions.
+- explicit omissions, contradictions, unsupported conditions, redactions,
+  warnings, limitations, and non-goals.
 
-Every retained evidence object is content-addressed. Missing required evidence
-prevents reliable `PRESENT` or `ABSENT` assignment.
+Every captured artifact is content-addressed and referenced by a manifest that
+has its own digest. Hashes make retained content tamper-evident. They do not
+authenticate its producer, provide non-repudiation, prove completeness or
+correctness, protect confidentiality, or make the content safe to publish.
+
+Redaction must record categories preserved, transformed, redacted, and omitted.
+If redaction removes, changes, or makes unavailable predicate-relevant
+evidence, the affected observation cannot remain `PRESENT` or `ABSENT`; it
+becomes `INDETERMINATE` or is not produced, according to the ADR-028 execution
+stage.
+
+## Authoritative evidence bundle boundary
+
+A finalized authoritative evidence bundle exists only when its minimum audit
+chain permits verification of the experiment contract, applied policies,
+baseline and candidate observations, and deterministic conclusion derivation.
+It preserves those observations and conclusion; it does not recalculate them
+from raw execution records, advisory metadata, or workload output.
+
+If the minimum audit chain is incomplete before observation assignment, Abaris
+may preserve a distinct local, non-conclusive attempt record. It must not emit
+observations, an authoritative evidence bundle, or a comparative conclusion.
+This specification defines the conceptual attempt-record boundary, not its
+serialization or a stable schema.
+
+After execution begins, insufficient predicate evidence produces an
+`INDETERMINATE` observation under ADR-028. That paired result may be preserved
+in an authoritative bundle only when the remaining minimum audit chain is
+complete. If required bundle-level evidence is unavailable, retained partial
+material remains an attempt record and carries no authoritative comparative
+conclusion.
+
+The normative private-draft minimum-content fixture is
+[adr-029-evidence-bundle-minimum.json](fixtures/adr-029-evidence-bundle-minimum.json).
+It defines preserved evidence concepts, not human-report rendering, a final
+serialization, or a public compatibility contract.
 
 ## Observation and conclusion requirements
 
-The result must always expose:
+A finalized paired result must always expose:
 
 - baseline observation;
 - candidate observation;
@@ -452,7 +491,9 @@ The specification must not contain behavior for:
 - Setup-network policy values and enforcement evidence.
 - Dependency acquisition and identity model.
 - Nondeterminism and rerun policy.
-- Evidence retention, redaction, encryption, and signing.
+- Evidence retention and deletion, redaction policy and serialization,
+  encryption, signing, authentication, independent verification tooling, and
+  safe export review.
 
 These decisions must be informed by the representative-case stabilization gate,
 not by designing a broad speculative schema.

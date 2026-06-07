@@ -91,13 +91,28 @@ broad regressions, or universal patch correctness.
 Evidence may contain source code, dependency information, traces, crash inputs,
 or vulnerability details. It must remain local by default.
 
-- Evidence objects must be content-addressed and attributable.
-- Missing, redacted, or truncated content must be explicit.
+- An authoritative evidence bundle exists only when its minimum audit chain
+  permits verification of the contract, applied policies, both observations,
+  and conclusion derivation.
+- Incomplete pre-observation attempts may be retained only as distinct,
+  non-conclusive attempt records.
+- Captured artifacts must be content-addressed and attributable; the manifest
+  must reference their digests and have its own digest.
+- Missing, transformed, redacted, omitted, or truncated content must be
+  explicit.
+- Redaction that removes, changes, or makes predicate-relevant evidence
+  unavailable prevents the affected observation from remaining `PRESENT` or
+  `ABSENT`; it becomes `INDETERMINATE` or is not produced, according to the
+  execution stage.
 - Restrictive local permissions and a retention policy are required.
 - No publication or export occurs without explicit human action.
 - Public historical status must be verified before any corpus item is shared.
 
-Content addressing does not make evidence safe to publish.
+Content addressing provides tamper evidence. It does not authenticate the
+producer, provide non-repudiation, prove completeness or correctness, protect
+confidentiality, or make evidence safe to publish. Signing, key management,
+authentication, independent verification tooling, and safe export review
+remain unresolved.
 
 ## Setup network
 
